@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chathruka Digital Guitar</title>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: white; text-align: center; }
+        h1 { margin-top: 20px; color: #ffcc00; }
+        
+        /* ගිටාර් එකේ ව්‍යුහය */
+        .guitar-body {
+            background: #8b4513; /* දුඹුරු පාට ගිටාර් බොඩිය */
+            width: 90%; max-width: 400px;
+            margin: 30px auto; padding: 20px;
+            border-radius: 50px;
+            border: 5px solid #5d2e0a;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.5);
+        }
+
+        /* ගිටාර් තන් (Strings) */
+        .fretboard {
+            background: #2a1a0a;
+            height: 300px; width: 80%;
+            margin: auto; padding: 10px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .string {
+            background: #c0c0c0; /* රිදී පාට තන් */
+            height: 280px; width: 4px;
+            margin: 0 10px; display: inline-block;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .string:active { background: #ffcc00; transform: scaleY(1.05); }
+
+    </style>
+</head>
+<body>
+
+    <h1>Chathruka Guitar</h1>
+    <p>තන් එකක් උඩ ටැප් කරලා බලන්න!</p>
+
+    <div class="guitar-body">
+        <div class="fretboard">
+            <div class="string" onclick="playChord(82.41, 0)"></div> <div class="string" onclick="playChord(110.00, 1)"></div> <div class="string" onclick="playChord(146.83, 2)"></div> <div class="string" onclick="playChord(196.00, 3)"></div> <div class="string" onclick="playChord(246.94, 4)"></div> <div class="string" onclick="playChord(329.63, 5)"></div> </div>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playChord(frequency, stringIndex) {
+            // Web Audio API 'මොළය' ක්‍රියාත්මක කිරීම
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sawtooth'; // ගිටාර් එකකට සමාන සද්දයක් දෙන තරංගය
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+            // ගිටාර් තන්තුවක සද්දය ක්‍රමයෙන් අඩුවෙන හැටි (Envelope)
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.5); // තප්පර 1.5කින් සද්දය නතර වෙනවා
+        }
+    </script>
+</body>
+</html>
