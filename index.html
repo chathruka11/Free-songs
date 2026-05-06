@@ -1,75 +1,70 @@
+
 <!DOCTYPE html>
 <html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chathruka Digital Guitar</title>
+    <title>Chathruka Music Studio</title>
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; text-align: center; }
-        h1 { margin-top: 20px; color: #ffcc00; }
+        body { font-family: sans-serif; background: #121212; color: white; text-align: center; }
+        .container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; }
         
-        /* ගිටාර් එකේ ව්‍යුහය */
-        .guitar-body {
-            background: #8b4513; /* දුඹුරු පාට ගිටාර් බොඩිය */
-            width: 90%; max-width: 400px;
-            margin: 30px auto; padding: 20px;
-            border-radius: 50px;
-            border: 5px solid #5d2e0a;
-            box-shadow: 10px 10px 20px rgba(0,0,0,0.5);
-        }
+        /* Guitar Styling */
+        .guitar-body { background: #5d2e0a; width: 300px; padding: 15px; border-radius: 30px; border: 4px solid #3d1f07; }
+        .string { background: #c0c0c0; height: 150px; width: 6px; margin: 5px; display: inline-block; border-radius: 3px; cursor: pointer; }
+        .string:active { background: #ffcc00; }
 
-        /* ගිටාර් තන් (Strings) */
-        .fretboard {
-            background: #2a1a0a;
-            height: 300px; width: 80%;
-            margin: auto; padding: 10px;
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .string {
-            background: #c0c0c0; /* රිදී පාට තන් */
-            height: 280px; width: 4px;
-            margin: 0 10px; display: inline-block;
-            border-radius: 2px;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-
-        .string:active { background: #ffcc00; transform: scaleY(1.05); }
-
+        /* Tabla Styling */
+        .tabla-container { display: flex; gap: 20px; margin-top: 20px; }
+        .tabla { width: 120px; height: 120px; border-radius: 50%; border: 8px solid #444; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: 0.1s; }
+        .dayan { background: #f5f5dc; color: black; border-color: #8b4513; } /* දයා */
+        .bayan { background: #333; color: white; border-color: #555; } /* බයා */
+        .tabla:active { transform: scale(0.9); box-shadow: 0 0 20px #ffcc00; }
     </style>
 </head>
 <body>
 
-    <h1>Chathruka Guitar</h1>
-    <p>තන් එකක් උඩ ටැප් කරලා බලන්න!</p>
+    <h1>Chathruka Music Studio</h1>
 
-    <div class="guitar-body">
-        <div class="fretboard">
-            <div class="string" onclick="playChord(82.41, 0)"></div> <div class="string" onclick="playChord(110.00, 1)"></div> <div class="string" onclick="playChord(146.83, 2)"></div> <div class="string" onclick="playChord(196.00, 3)"></div> <div class="string" onclick="playChord(246.94, 4)"></div> <div class="string" onclick="playChord(329.63, 5)"></div> </div>
+    <div class="container">
+        <div class="guitar-body">
+            <h3>Guitar</h3>
+            <div class="string" onclick="playSound(82.41, 'sawtooth', 1.5)"></div>
+            <div class="string" onclick="playSound(110.00, 'sawtooth', 1.5)"></div>
+            <div class="string" onclick="playSound(146.83, 'sawtooth', 1.5)"></div>
+            <div class="string" onclick="playSound(196.00, 'sawtooth', 1.5)"></div>
+            <div class="string" onclick="playSound(246.94, 'sawtooth', 1.5)"></div>
+            <div class="string" onclick="playSound(329.63, 'sawtooth', 1.5)"></div>
+        </div>
+
+        <h3>Tabla</h3>
+        <div class="tabla-container">
+            <div class="tabla dayan" onclick="playSound(200, 'sine', 0.3)">දයා (Dayan)</div>
+            <div class="tabla bayan" onclick="playSound(80, 'sine', 0.5)">බයා (Bayan)</div>
+        </div>
     </div>
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function playChord(frequency, stringIndex) {
-            // Web Audio API 'මොළය' ක්‍රියාත්මක කිරීම
+        function playSound(frequency, type, duration) {
+            // බ්‍රවුසර් එකේ ඕඩියෝ පණ ගැන්වීම
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
 
-            osc.type = 'sawtooth'; // ගිටාර් එකකට සමාන සද්දයක් දෙන තරංගය
+            osc.type = type;
             osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
 
-            // ගිටාර් තන්තුවක සද්දය ක්‍රමයෙන් අඩුවෙන හැටි (Envelope)
             gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
 
             osc.start();
-            osc.stop(audioCtx.currentTime + 1.5); // තප්පර 1.5කින් සද්දය නතර වෙනවා
+            osc.stop(audioCtx.currentTime + duration);
         }
     </script>
 </body>
