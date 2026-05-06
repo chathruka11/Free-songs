@@ -1,70 +1,98 @@
-
 <!DOCTYPE html>
 <html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chathruka Music Studio</title>
+    <title>Chathruka All-in-One Studio</title>
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; text-align: center; }
-        .container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; }
+        body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
+        .section { background: #222; border-radius: 15px; padding: 15px; margin-bottom: 20px; border: 1px solid #444; }
+        h2 { color: #ffcc00; }
         
-        /* Guitar Styling */
-        .guitar-body { background: #5d2e0a; width: 300px; padding: 15px; border-radius: 30px; border: 4px solid #3d1f07; }
-        .string { background: #c0c0c0; height: 150px; width: 6px; margin: 5px; display: inline-block; border-radius: 3px; cursor: pointer; }
-        .string:active { background: #ffcc00; }
-
-        /* Tabla Styling */
-        .tabla-container { display: flex; gap: 20px; margin-top: 20px; }
-        .tabla { width: 120px; height: 120px; border-radius: 50%; border: 8px solid #444; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: 0.1s; }
-        .dayan { background: #f5f5dc; color: black; border-color: #8b4513; } /* දයා */
-        .bayan { background: #333; color: white; border-color: #555; } /* බයා */
-        .tabla:active { transform: scale(0.9); box-shadow: 0 0 20px #ffcc00; }
+        /* Styles Buttons */
+        .style-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .btn { padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .play-btn { background: #27ae60; color: white; }
+        .stop-btn { background: #c0392b; color: white; width: 100%; margin-top: 10px; }
+        .inst-btn { background: #34495e; color: white; margin: 5px; }
+        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <h1>Chathruka Music Studio</h1>
+    <h1>Chathruka Ultimate Studio</h1>
 
-    <div class="container">
-        <div class="guitar-body">
-            <h3>Guitar</h3>
-            <div class="string" onclick="playSound(82.41, 'sawtooth', 1.5)"></div>
-            <div class="string" onclick="playSound(110.00, 'sawtooth', 1.5)"></div>
-            <div class="string" onclick="playSound(146.83, 'sawtooth', 1.5)"></div>
-            <div class="string" onclick="playSound(196.00, 'sawtooth', 1.5)"></div>
-            <div class="string" onclick="playSound(246.94, 'sawtooth', 1.5)"></div>
-            <div class="string" onclick="playSound(329.63, 'sawtooth', 1.5)"></div>
+    <div class="section">
+        <h2>Rhythm Styles (ස්ටයිල් ටික ප්ලේ කරලා බලන්න)</h2>
+        <div class="style-grid">
+            <button class="btn play-btn" onclick="startStyle('baila')">Baila Style (6/8)</button>
+            <button class="btn play-btn" onclick="startStyle('pop')">90s Pop Style</button>
+            <button class="btn play-btn" onclick="startStyle('classical')">Classical (Tabla)</button>
+            <button class="btn play-btn" onclick="startStyle('fast')">Fast Beat</button>
         </div>
+        <button class="btn stop-btn" onclick="stopStyle()">Stop All Music</button>
+    </div>
 
-        <h3>Tabla</h3>
-        <div class="tabla-container">
-            <div class="tabla dayan" onclick="playSound(200, 'sine', 0.3)">දයා (Dayan)</div>
-            <div class="tabla bayan" onclick="playSound(80, 'sine', 0.5)">බයා (Bayan)</div>
-        </div>
+    <div class="section">
+        <h2>Instruments (වාදනය කරන්න)</h2>
+        <button class="btn inst-btn" onclick="playNote(261)">Piano C</button>
+        <button class="btn inst-btn" onclick="playNote(293)">Piano D</button>
+        <button class="btn inst-btn" onclick="playDrum(60, 0.2)">Bass Drum</button>
+        <button class="btn inst-btn" onclick="playDrum(200, 0.1)">Snare</button>
     </div>
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let loopInterval;
 
-        function playSound(frequency, type, duration) {
-            // බ්‍රවුසර් එකේ ඕඩියෝ පණ ගැන්වීම
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-
+        function playNote(freq) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 1);
+        }
 
-            osc.type = type;
-            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        function playDrum(freq, duration) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
 
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
+        function startStyle(style) {
+            stopStyle();
+            let beat = 0;
+            const tempo = style === 'fast' ? 200 : 400; // වේගය පාලනය
 
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
+            loopInterval = setInterval(() => {
+                if (style === 'baila') {
+                    // බයිලා රිදම් එක (6/8)
+                    if (beat % 3 === 0) playDrum(60, 0.3); // Bass
+                    else playDrum(150, 0.1); // Snare
+                } else if (style === 'pop') {
+                    // 90s Pop රිදම් එක
+                    if (beat % 4 === 0) playDrum(70, 0.4);
+                    if (beat % 4 === 2) playDrum(120, 0.2);
+                } else if (style === 'classical') {
+                    // තබ්ලා ස්ටයිල් එක
+                    if (beat % 4 === 0) playDrum(80, 0.5); // Bayan
+                    if (beat % 2 === 1) playDrum(200, 0.2); // Dayan
+                }
+                beat++;
+            }, tempo);
+        }
+
+        function stopStyle() {
+            clearInterval(loopInterval);
         }
     </script>
 </body>
